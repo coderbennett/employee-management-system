@@ -1,15 +1,34 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
-const SysArt = require('./lib/SysArt');
+
+const sysArt = require('./lib/sysArt');
+
 const Department = require('./lib/Department')
 const Role = require('./lib/Role');
 const Employee = require('./lib/Employee');
 
+const db = mysql.createConnection(
+    {
+        host: 'localhost',
+        user: 'root',
+        password: 'password',
+        database: 'employee_db'
+    },
+    console.log('Connected to the employee_db database.')
+)
+
 function startSys() {
-    console.log(SysArt);
+    console.log(sysArt);
+
+    //main menu inquiry
 }
 
+//main menu function
+function mainMenu() {
+    inquirer
+        .prompt()
+}
 
 // console.table([{
 //     name: 'foo',
