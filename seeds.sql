@@ -24,18 +24,18 @@ VALUES  ("Business Dev Rep", "52,000 USD", 4),
         ("Full Stack Developer", "112,000 USD", 6)
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES  ("George", "Schwimmer", 2, null),
+VALUES  ("George", "Schwimmer", 2, 2),
         ("Helen", "Carmichael", 2, null),
         ("Torsten", "Flor", 1, null),
-        ("Demi", "Francis", 8, 1),
+        ("Demi", "Francis", 8, 11),
         ("Chandra", "Otila", 3, null),
         ("Juan", "Jocelyn", 4, null),
         ("Valerie", "Luba", 7, null),
         ("Lilias", "Carlisa", 11, null),
         ("Jimmy", "Vishal", 6, null),
         ("Kareem", "Arn", 5, 2),
-        ("Patricia", "Woods", 8, 3),
-        ("Leia", "Elfrida", 15, null),
-        ("Shaun", "Glenwood", 15, null),
-        ("Amir", "Abramo", 15, 4),
-        ("Allan", "Elisheva", 3, null)
+        ("Patricia", "Woods", 8, null),
+        ("Leia", "Elfrida", 15, 14),
+        ("Shaun", "Glenwood", 15, 14),
+        ("Amir", "Abramo", 15, null),
+        ("Allan", "Elisheva", 3, 5)
