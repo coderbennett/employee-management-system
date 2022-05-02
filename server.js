@@ -86,9 +86,29 @@ function addRole() {
 }
 
 function viewTable(table) {
-    //use mysql query to show table user wants to see
-    //display the table
-    //open main menu
+    let sql;
+
+    switch (table) {
+        case 'employees':
+            sql = `SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, IFNULL(CONCAT(m.first_name, ', ', m.last_name), NULL) AS manager FROM employee LEFT JOIN employee AS m ON employee.manager_id = m.id INNER JOIN roles ON employee.role_id = roles.id INNER JOIN department ON roles.department_id = department.id ORDER BY employee.id`;
+            break;
+        case 'roles':
+            sql = `SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles INNER JOIN department ON department.id = roles.department_id ORDER BY roles.id`;
+            break;
+        default:
+            sql = `SELECT * FROM department`;
+            break;
+    }
+
+    db.query(sql, (err, res) => {
+        if(err) {
+            res.serverStatus(500).json({ error: err.message});
+            return;
+        }
+        console.table(res);
+    });
+
+    mainMenu();
 }
 
 // console.table([{
