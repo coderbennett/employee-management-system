@@ -25,3 +25,5 @@ SELECT roles.id, roles.title, roles.salary FROM roles INNER JOIN department ON d
 
 --READ ALL EMPLOYEES--
 --SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, IFNULL(CONCAT(m.first_name, ', ', m.last_name), NULL) AS manager FROM employee LEFT JOIN employee AS m ON employee.manager_id = m.id INNER JOIN roles ON employee.role_id = roles.id INNER JOIN department ON roles.department_id = department.id ORDER BY employee.id;--
+
+--UPDATE employee SET employee.role_id = ?, WHERE employee.id = ?;--
