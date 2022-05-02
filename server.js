@@ -59,57 +59,60 @@ function mainMenu() {
 }
 
 function addEmployee() {
-    //use this function to inquire user
+    //initialize all the variables we will need here
+    let roleId;
+    let managerId;
+    let managerName;
+    let queryArray;
+
     inquirer
         .prompt(questions[3])
         .then((response) => {
-
-            let roleId;
-            let managerId;
+            queryArray = [response.employeeFirstName, response.employeeLastName];
+            //split the string into first and last names
+            managerName = response.employeeManager.split(" ");
+            console.log("Manager name: " + managerName);
 
             //query for the role id with the user's input of the title
             db.query(`SELECT id FROM roles WHERE title = ?`, response.employeeRole, (err, result) => {
-                roleId = result;
+                console.log("Result for Role select query: " + result[0].id);
+                roleId = result[0].id;
                 console.log("Role ID: " + roleId);
+                queryArray.push(roleId);
             });
 
             //if the employee is a manager the response is none
-            if (response.employeeManager === "None") {
+            if (managerName === "None") {
                 managerId = null;
             } else {
-                //split the string into first and last names
-                let managerName = response.employeeManager.split(" ");
-                console.log("Manager name: " + managerName);
 
                 //query the employee id from the first and last name
                 db.query(`SELECT id FROM employee WHERE first_name = ? AND last_name = ?`, managerName, (err, result) => {
                     if(err) {
                         console.error(err);
                     }
-                    managerId = result;
+                    console.log("Result from managerID select query: " + result[0].id);
+                    managerId = result[0].id;
+                    queryArray.push(managerId);
                     console.log("Manager ID: " + managerId);
                 });
             }
 
-            //now insert the new employee data into the database
-            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
-            [
-                response.employeeFirstName,
-                response.employeeLastName,
-                roleId,
-                managerId
-            ], (err, result) => {
-                if(err) {
-                    console.error(err);
-                }
-                console.log(result.json);
-                console.log("Added " + response.employeeFirstName + " " + response.employeeLastName + " to the database.");
-                mainMenu();
-            });
+            //we have to set a timeout for this query, otherwise it runs before the others complete
+            setTimeout(() => {
+                console.log(queryArray);
+                //now insert the new employee data into the database
+                db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
+                queryArray, (err, result) => {
+                    if(err) {
+                        console.error(err);
+                    }
+                    console.log(result);
+                    console.log("Added " + queryArray[0] + " " + queryArray[1] + " to the database.");
+                    mainMenu();
+                });
+            }, 1000);
         });
-    //it should then insert the new employee into the db
-    //log "added first + last name to the database"
-    //lastly, open the main menu again
 }
 
 function updateEmployee() {
