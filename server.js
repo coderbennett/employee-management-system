@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 
 const sysArt = require('./lib/sysArt');
-// const questions = require('./lib/questions');
+const questions = require('./lib/questions');
 
 const db = mysql.createConnection(
     {
@@ -18,16 +18,17 @@ const db = mysql.createConnection(
 function startSys() {
     console.log(sysArt);
     //main menu inquiry
+    mainMenu();
 }
 
 //main menu function
 function mainMenu() {
     inquirer
-        .prompt(questions.menuQuestions)
+        .prompt(questions[0])
         .then((response) => {
             switch (response.menuChoice) {
                 case 'View All Employees':
-                    viewTable(employees);
+                    viewTable("employees");
                     break;
                 case 'Add Employee':
                     addEmployee();
@@ -36,12 +37,12 @@ function mainMenu() {
                     updateEmployee();
                     break;
                 case 'View All Roles':
-                    viewTable(roles);
+                    viewTable("roles");
                     break;
                 case 'Add Role':
                     addRole();
                 case 'View All Departments':
-                    viewTable(departments);
+                    viewTable("departments");
                     break;
                 case 'Add Department':
                     addDept();
@@ -54,13 +55,13 @@ function mainMenu() {
                     mainMenu();
                     break;
             }
-        })
+        });
 }
 
 function addEmployee() {
     //use this function to inquire user
     inquirer
-        .prompt(question.employeeQuestions)
+        .prompt(questions[3])
         .then((response) => {
 
             let roleId;
@@ -93,10 +94,9 @@ function addEmployee() {
                 managerId
             ], (err, result) => {
                 console.log("Added " + response.employeeFirstName + " " + response.employeeLastName + " to the database.");
+                mainMenu();
             });
         });
-
-        mainMenu();
     //it should then insert the new employee into the db
     //log "added first + last name to the database"
     //lastly, open the main menu again
@@ -112,14 +112,13 @@ function updateEmployee() {
 function addDept() {
     //use this function to inquire user
     inquirer
-        .prompt(questions.deptQuestions)
+        .prompt(questions[1])
         .then((response) => {
             db.query(`INSERT INTO department WHERE name = ?`, response.deptName, (err, result) => {
                 console.log("Added " + response.deptName + " to the database.");
+                mainMenu();
             });
         });
-
-        mainMenu();
 }
 
 function addRole() {
@@ -150,9 +149,9 @@ function viewTable(table) {
             return;
         }
         console.table(res);
+        mainMenu();
     });
 
-    mainMenu();
 }
 
 // console.table([{
