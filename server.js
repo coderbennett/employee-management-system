@@ -91,8 +91,12 @@ function addEmployee() {
                 response.employeeLastName,
                 roleId,
                 managerId
-            ])
-        })
+            ], (err, result) => {
+                console.log("Added " + response.employeeFirstName + " " + response.employeeLastName + " to the database.");
+            });
+        });
+
+        mainMenu();
     //it should then insert the new employee into the db
     //log "added first + last name to the database"
     //lastly, open the main menu again
@@ -107,9 +111,15 @@ function updateEmployee() {
 
 function addDept() {
     //use this function to inquire user
-    //it should then insert the new deptartment into the db
-    //log "added dept to the database"
-    //open main menu
+    inquirer
+        .prompt(questions.deptQuestions)
+        .then((response) => {
+            db.query(`INSERT INTO department WHERE name = ?`, response.deptName, (err, result) => {
+                console.log("Added " + response.deptName + " to the database.");
+            });
+        });
+
+        mainMenu();
 }
 
 function addRole() {
