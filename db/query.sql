@@ -18,7 +18,7 @@ SELECT name FROM department INNER JOIN roles ON roles.department_id = department
 SELECT roles.id, roles.title, roles.salary FROM roles INNER JOIN department ON department.id = roles.department_id;
 
 --READ ALL DEPARTMENTS--
---SELECT name FROM department--
+--SELECT * FROM department--
 
 --READ ALL ROLES--
 --SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles INNER JOIN department ON department.id = roles.department_id ORDER BY roles.id;--
