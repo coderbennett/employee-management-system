@@ -25,7 +25,7 @@ function mainMenu() {
     inquirer
         .prompt(questions.menuQuestions)
         .then((response) => {
-            switch (response) {
+            switch (response.menuChoice) {
                 case 'View All Employees':
                     viewTable(employees);
                     break;
@@ -59,6 +59,40 @@ function mainMenu() {
 
 function addEmployee() {
     //use this function to inquire user
+    inquirer
+        .prompt(question.employeeQuestions)
+        .then((response) => {
+
+            let roleId;
+            let managerId;
+
+            //query for the role id with the user's input of the title
+            db.query(`SELECT id FROM roles WHERE title = ?`, response.employeeRole, (err, result) => {
+                roleId = result;
+            });
+
+            //if the employee is a manager the response is none
+            if (response.employeeManager === "None") {
+                managerId = NULL;
+            } else {
+                //split the string into first and last names
+                let managerName = response.employeeManager.split(" ");
+
+                //query the employee id from the first and last name
+                db.query(`SELECT id FROM employee WHERE first_name = ? AND last_name = ?`, managerName, (err, result) => {
+                    managerId = result;
+                });
+            }
+
+            //now insert the new employee data into the database
+            db.query(`INSERT INTO employee WHERE first_name = ? AND last_name = ? AND role_id = ? AND manager_id = ?`,
+            [
+                response.employeeFirstName,
+                response.employeeLastName,
+                roleId,
+                managerId
+            ])
+        })
     //it should then insert the new employee into the db
     //log "added first + last name to the database"
     //lastly, open the main menu again
