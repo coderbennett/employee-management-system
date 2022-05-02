@@ -70,29 +70,39 @@ function addEmployee() {
             //query for the role id with the user's input of the title
             db.query(`SELECT id FROM roles WHERE title = ?`, response.employeeRole, (err, result) => {
                 roleId = result;
+                console.log("Role ID: " + roleId);
             });
 
             //if the employee is a manager the response is none
             if (response.employeeManager === "None") {
-                managerId = NULL;
+                managerId = null;
             } else {
                 //split the string into first and last names
                 let managerName = response.employeeManager.split(" ");
+                console.log("Manager name: " + managerName);
 
                 //query the employee id from the first and last name
                 db.query(`SELECT id FROM employee WHERE first_name = ? AND last_name = ?`, managerName, (err, result) => {
+                    if(err) {
+                        console.error(err);
+                    }
                     managerId = result;
+                    console.log("Manager ID: " + managerId);
                 });
             }
 
             //now insert the new employee data into the database
-            db.query(`INSERT INTO employee WHERE first_name = ? AND last_name = ? AND role_id = ? AND manager_id = ?`,
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
             [
                 response.employeeFirstName,
                 response.employeeLastName,
                 roleId,
                 managerId
             ], (err, result) => {
+                if(err) {
+                    console.error(err);
+                }
+                console.log(result.json);
                 console.log("Added " + response.employeeFirstName + " " + response.employeeLastName + " to the database.");
                 mainMenu();
             });
@@ -114,8 +124,14 @@ function addDept() {
     inquirer
         .prompt(questions[1])
         .then((response) => {
-            db.query(`INSERT INTO department WHERE name = ?`, response.deptName, (err, result) => {
-                console.log("Added " + response.deptName + " to the database.");
+            let deptName = response.deptName;
+
+            db.query(`INSERT INTO department (name) VALUES (?)`, deptName, (err, result) => {
+                if (err) {
+                    console.error(err);
+                }
+                console.log(result);
+                console.log("Added " + deptName + " to the database.");
                 mainMenu();
             });
         });
