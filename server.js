@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 
 const sysArt = require('./lib/sysArt');
-const questions = require('./lib/questions');
+// const questions = require('./lib/questions');
 
 const db = mysql.createConnection(
     {
@@ -17,14 +17,13 @@ const db = mysql.createConnection(
 
 function startSys() {
     console.log(sysArt);
-
     //main menu inquiry
 }
 
 //main menu function
 function mainMenu() {
     inquirer
-        .prompt()
+        .prompt(questions.menuQuestions)
 }
 
 function addEmployee() {
