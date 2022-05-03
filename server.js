@@ -14,6 +14,11 @@ const db = mysql.createConnection(
     console.log('Connected to the employee_db database.')
 )
 
+var employeeList = createEmployeeList();
+var managerList = createManagerList();
+var roleList = createRoleList();
+var deptList = createDeptList();
+
 function startSys() {
     console.log(sysArt);
     //main menu inquiry
@@ -22,6 +27,11 @@ function startSys() {
 
 //main menu function
 function mainMenu() {
+    employeeList = createEmployeeList();
+    managerList = createManagerList();
+    roleList = createRoleList();
+    deptList = createDeptList();
+
     inquirer
         .prompt([ 
             {
@@ -71,8 +81,6 @@ function addEmployee() {
     let managerId;
     let managerName;
     let queryArray;
-    let managerList = createManagerList();
-    let roleList = createRoleList();
 
     inquirer
         .prompt([
@@ -107,27 +115,26 @@ function addEmployee() {
             //query for the role id with the user's input of the title
             db.query(`SELECT id FROM roles WHERE title = ?`, response.employeeRole, (err, result) => {
                 roleId = result[0].id;
-                queryArray.push(roleId);
             });
 
             //if the employee is a manager the response is none
-            if (managerName === "None") {
+            if (response.employeeManager === "None") {
                 managerId = null;
             } else {
-
                 //query the employee id from the first and last name
                 db.query(`SELECT id FROM employee WHERE first_name = ? AND last_name = ?`, managerName, (err, result) => {
                     if(err) {
                         console.error(err);
                     }
                     managerId = result[0].id;
-                    queryArray.push(managerId);
                 });
             }
-
+            
             console.log("Loading..");
             //we have to set a timeout for this query, otherwise it runs before the others complete
             setTimeout(() => {
+                queryArray.push(roleId);
+                queryArray.push(managerId);
                 //now insert the new employee data into the database
                 db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
                 queryArray, (err, result) => {
@@ -142,12 +149,55 @@ function addEmployee() {
 }
 
 function updateEmployee() {
-    //use this function to inquire user
-    // inquirer
-    //     .prompt(questions[4])
-    //     .then((response) => {
-    //         db.query()
-    //     })
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Which employee's role do you want to update?",
+                name: "employeeSelection",
+                choices: employeeList
+            },
+            {
+                type: "list",
+                message: "Which role do you want to assign to the selected employee?",
+                name: "employeeRole",
+                choices: roleList
+            }
+        ])
+        .then((response) => {
+            let employeeName = response.employeeSelection.split(" ");
+            let roleName = response.employeeRole;
+            let employeeId;
+            let roleId;
+
+            db.query(`SELECT id FROM employee WHERE first_name = ? AND last_name = ?`, employeeName, (err, result) => {
+                if(err) {
+                    console.error(err);
+                }
+                employeeId = result[0].id;
+            });
+
+            db.query('SELECT id FROM roles WHERE title = ?', roleName, (err, result) => {
+                if(err) {
+                    console.error(err);
+                }
+                roleId = result[0].id;
+            });
+
+            console.log("Loading..");
+            //we have to set a timeout for this query, otherwise it runs before the others complete
+            setTimeout(() => {
+                //now update the new employee data to the database
+                db.query(`UPDATE employee SET role_id = ? WHERE id = ?`,
+                [roleId, employeeId], (err, result) => {
+                    if(err) {
+                        console.error(err);
+                    }
+                    console.log("Updated " + employeeName[0] + " " + employeeName[1] + " to the database.");
+                    mainMenu();
+                });
+            }, 1000);
+        });
     //it should update the employee's title in the db
     //log "updated first + last name into the db"
     //open main menu
@@ -177,7 +227,6 @@ function addDept() {
 }
 
 function addRole() {
-    let deptList = createDeptList();
 
     inquirer
         .prompt([
@@ -268,6 +317,7 @@ function createDeptList() {
             questionArray.push(res[i].name);
             questionArray.push(new inquirer.Separator());
         }
+        
     });
     return questionArray;
 }
@@ -285,6 +335,7 @@ function createRoleList() {
             questionArray.push(res[i].title);
             questionArray.push(new inquirer.Separator());
         }
+        
     });
     return questionArray;
 }
@@ -302,6 +353,7 @@ function createManagerList() {
             questionArray.push(res[i].first_name + " " + res[i].last_name);
             questionArray.push(new inquirer.Separator());
         }
+        
     });
     return questionArray;
 }
@@ -319,6 +371,7 @@ function createEmployeeList() {
             questionArray.push(res[i].first_name + " " + res[i].last_name);
             questionArray.push(new inquirer.Separator());
         }
+        
     });
     return questionArray;
 }
