@@ -4,6 +4,7 @@ const cTable = require('console.table');
 
 const sysArt = require('./lib/sysArt');
 
+//connect to the database here
 const db = mysql.createConnection(
     {
         host: 'localhost',
@@ -20,6 +21,7 @@ var roleList = createRoleList();
 var deptList = createDeptList();
 
 function startSys() {
+    //this console logs the ascii art we have on another file
     console.log(sysArt);
     //main menu inquiry
     mainMenu();
@@ -27,11 +29,13 @@ function startSys() {
 
 //main menu function
 function mainMenu() {
+    //update the lists on each mainmenu start
     employeeList = createEmployeeList();
     managerList = createManagerList();
     roleList = createRoleList();
     deptList = createDeptList();
 
+    //inquire the user with a list of choices, and use the switch statement to invoke next function
     inquirer
         .prompt([ 
             {
@@ -198,9 +202,6 @@ function updateEmployee() {
                 });
             }, 1000);
         });
-    //it should update the employee's title in the db
-    //log "updated first + last name into the db"
-    //open main menu
 }
 
 function addDept() {
@@ -375,19 +376,6 @@ function createEmployeeList() {
     });
     return questionArray;
 }
-
-// console.table([{
-//     name: 'foo',
-//     age: 10
-// }, {
-//     name: 'bar',
-//     age: 20
-// }]);
-
-// prints
-// name age
-// ---- ---
-// foo 10
-// bar 20
-        
+       
+//call the system to start
 startSys();
