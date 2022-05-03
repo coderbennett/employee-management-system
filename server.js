@@ -41,6 +41,7 @@ function mainMenu() {
                     break;
                 case 'Add Role':
                     addRole();
+                    break;
                 case 'View All Departments':
                     viewTable("departments");
                     break;
@@ -71,13 +72,10 @@ function addEmployee() {
             queryArray = [response.employeeFirstName, response.employeeLastName];
             //split the string into first and last names
             managerName = response.employeeManager.split(" ");
-            console.log("Manager name: " + managerName);
 
             //query for the role id with the user's input of the title
             db.query(`SELECT id FROM roles WHERE title = ?`, response.employeeRole, (err, result) => {
-                console.log("Result for Role select query: " + result[0].id);
                 roleId = result[0].id;
-                console.log("Role ID: " + roleId);
                 queryArray.push(roleId);
             });
 
@@ -91,23 +89,20 @@ function addEmployee() {
                     if(err) {
                         console.error(err);
                     }
-                    console.log("Result from managerID select query: " + result[0].id);
                     managerId = result[0].id;
                     queryArray.push(managerId);
-                    console.log("Manager ID: " + managerId);
                 });
             }
 
+            console.log("Loading..");
             //we have to set a timeout for this query, otherwise it runs before the others complete
             setTimeout(() => {
-                console.log(queryArray);
                 //now insert the new employee data into the database
                 db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
                 queryArray, (err, result) => {
                     if(err) {
                         console.error(err);
                     }
-                    console.log(result);
                     console.log("Added " + queryArray[0] + " " + queryArray[1] + " to the database.");
                     mainMenu();
                 });
@@ -133,7 +128,6 @@ function addDept() {
                 if (err) {
                     console.error(err);
                 }
-                console.log(result);
                 console.log("Added " + deptName + " to the database.");
                 mainMenu();
             });
@@ -142,9 +136,37 @@ function addDept() {
 
 function addRole() {
     //use this function to inquire user
-    //it should then insert the new role into the db
-    //log "added role to the database"
-    //open main menu
+    inquirer
+        .prompt(questions[2])
+        .then((response) => {
+            let roleName = response.roleName;
+            let roleSalary = response.roleSalary;
+            let roleDept = response.roleDept;
+            let deptId;
+
+            db.query(`SELECT id FROM department WHERE name = ?`, roleDept, (err, result) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    deptId = result[0].id;
+                }
+            });
+            console.log("Loading..");
+            setTimeout(() => {
+                db.query(`INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`, 
+                [
+                    roleName,
+                    roleSalary,
+                    deptId
+                ], (err, results) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                    console.log("Added " + roleName + " to the database.");
+                    mainMenu();
+                });
+            }, 1000);
+        });
 }
 
 function viewTable(table) {
