@@ -3,7 +3,6 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 
 const sysArt = require('./lib/sysArt');
-const questions = require('./lib/questions');
 
 const db = mysql.createConnection(
     {
@@ -24,7 +23,14 @@ function startSys() {
 //main menu function
 function mainMenu() {
     inquirer
-        .prompt(questions[0])
+        .prompt([ 
+            {
+                type: "list",
+                message: "What would you like to do?",
+                name: "menuChoice",
+                choices: ["View All Employees", new inquirer.Separator(), "Add Employee", new inquirer.Separator(), "Update Employee Role", new inquirer.Separator(), "View All Roles", new inquirer.Separator(), "Add Role", new inquirer.Separator(), "View All Departments", new inquirer.Separator(), "Add Department", new inquirer.Separator(), "Quit", new inquirer.Separator() ]
+            }
+        ])
         .then((response) => {
             switch (response.menuChoice) {
                 case 'View All Employees':
@@ -65,9 +71,34 @@ function addEmployee() {
     let managerId;
     let managerName;
     let queryArray;
+    let managerList = createManagerList();
+    let roleList = createRoleList();
 
     inquirer
-        .prompt(questions[3])
+        .prompt([
+            {
+                type: "input",
+                message: "What is the employee's first name?",
+                name: "employeeFirstName"
+            },
+            {
+                type: "input",
+                message: "What is the employee's last name?",
+                name: "employeeLastName"
+            },
+            {
+                type: "list",
+                message: "What is the employee's role?",
+                name: "employeeRole",
+                choices: roleList
+            },
+            {
+                type: "list",
+                message: "Who is the employee's manager?",
+                name: "employeeManager",
+                choices: managerList
+            }
+        ])
         .then((response) => {
             queryArray = [response.employeeFirstName, response.employeeLastName];
             //split the string into first and last names
@@ -112,6 +143,11 @@ function addEmployee() {
 
 function updateEmployee() {
     //use this function to inquire user
+    // inquirer
+    //     .prompt(questions[4])
+    //     .then((response) => {
+    //         db.query()
+    //     })
     //it should update the employee's title in the db
     //log "updated first + last name into the db"
     //open main menu
@@ -120,7 +156,13 @@ function updateEmployee() {
 function addDept() {
     //use this function to inquire user
     inquirer
-        .prompt(questions[1])
+        .prompt([
+            {
+                type: "input",
+                message: "What is the name of the department?",
+                name: "deptName"
+            }
+        ])
         .then((response) => {
             let deptName = response.deptName;
 
@@ -135,9 +177,27 @@ function addDept() {
 }
 
 function addRole() {
-    //use this function to inquire user
+    let deptList = createDeptList();
+
     inquirer
-        .prompt(questions[2])
+        .prompt([
+            {
+                type: "input",
+                message: "What is the name of the role?",
+                name: "roleName"
+            },
+            {
+                type: "input",
+                message: "What is the salary of the role?",
+                name: "roleSalary"
+            },
+            {
+                type: "list",
+                message: "Which department does the role belong to?",
+                name: "roleDept",
+                choices: deptList
+            }
+        ])
         .then((response) => {
             let roleName = response.roleName;
             let roleSalary = response.roleSalary;
@@ -193,6 +253,74 @@ function viewTable(table) {
         mainMenu();
     });
 
+}
+
+function createDeptList() {
+    const sql = `SELECT name FROM department`;
+    let questionArray = [];
+
+    db.query(sql, (err, res) => {
+        if(err) {
+            res.serverStatus(500).json({ error: err.message});
+            return;
+        }
+        for(let i = 0; i < res.length; i++) {
+            questionArray.push(res[i].name);
+            questionArray.push(new inquirer.Separator());
+        }
+    });
+    return questionArray;
+}
+
+function createRoleList() {
+    const sql = `SELECT title FROM roles`;
+    let questionArray = [];
+
+    db.query(sql, (err, res) => {
+        if(err) {
+            res.serverStatus(500).json({ error: err.message});
+            return;
+        }
+        for(let i = 0; i < res.length; i++) {
+            questionArray.push(res[i].title);
+            questionArray.push(new inquirer.Separator());
+        }
+    });
+    return questionArray;
+}
+
+function createManagerList() {
+    const sql = `SELECT first_name, last_name FROM employee WHERE manager_id IS NULL`;
+    let questionArray = ["None", new inquirer.Separator()];
+
+    db.query(sql, (err, res) => {
+        if(err) {
+            res.serverStatus(500).json({ error: err.message});
+            return;
+        }
+        for(let i = 0; i < res.length; i++) {
+            questionArray.push(res[i].first_name + " " + res[i].last_name);
+            questionArray.push(new inquirer.Separator());
+        }
+    });
+    return questionArray;
+}
+
+function createEmployeeList() {
+    const sql = `SELECT first_name, last_name FROM employee`;
+    let questionArray = [];
+
+    db.query(sql, (err, res) => {
+        if(err) {
+            res.serverStatus(500).json({ error: err.message});
+            return;
+        }
+        for(let i = 0; i < res.length; i++) {
+            questionArray.push(res[i].first_name + " " + res[i].last_name);
+            questionArray.push(new inquirer.Separator());
+        }
+    });
+    return questionArray;
 }
 
 // console.table([{
